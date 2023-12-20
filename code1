@@ -1,0 +1,70 @@
+import numpy as np
+from scipy.spatial import cKDTree
+from scipy.stats import median_absolute_deviation
+from sklearn.decomposition import PCA
+
+def GRADIENTESTIMATOR(S, epsilon, dimension, confidence):
+    # Implementation of GRADIENTESTIMATOR function
+    
+    # Your implementation here
+    
+    return estimated_gradient
+
+def MEAN(S):
+    # Implementation of MEAN function
+    
+    # Your implementation here
+    
+    return mean_value
+
+def robust_ball(center, samples, epsilon):
+    # Find the smallest ball containing (1 - epsilon) fraction of samples
+    tree = cKDTree(samples)
+    num_points = len(samples)
+    num_inside = int(np.ceil((1 - epsilon) * num_points))
+    distances = tree.query(center, num_inside)
+    radius = np.max(distances)
+    return center, radius
+
+def robust_mean_estimator(S, epsilon, dimension, confidence):
+    d = dimension
+    samples = np.array(S)
+    
+    if d == 1:
+        return MEAN(samples)
+    
+    ball_centers = []
+    for i in range(d):
+        Si = samples[:, i]
+        ci = np.median(Si)
+        ball_centers.append(ci)
+    
+    ball_center, ball_radius = robust_ball(ball_centers, samples, epsilon)
+    B = np.linalg.norm(samples - ball_center, axis=1) <= ball_radius
+    Se = samples[B]
+
+    if d == 1:
+        return MEAN(Se)
+
+    covariance_matrix = np.cov(Se, rowvar=False)
+    pca = PCA(n_components=d)
+    pca.fit(Se)
+    V = pca.components_[:d // 2]
+    W = pca.components_[d // 2:]
+    
+    SV = np.dot(Se, V.T)
+    SW = np.dot(Se, W.T)
+
+    mu_bV = GRADIENTESTIMATOR(SV, epsilon, d // 2, confidence)
+    mu_bW = MEAN(SW)
+
+    return mu_bV, mu_bW
+
+# Example usage
+gradient_sample_S = np.random.rand(100, 3)  # Replace with your actual data
+level_of_corruption = 0.1
+dimension_d = 3
+confidence_delta = 0.95
+
+result = robust_mean_estimator(gradient_sample_S, level_of_corruption, dimension_d, confidence_delta)
+print(result)
