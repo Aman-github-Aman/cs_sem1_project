@@ -1,0 +1,37 @@
+import numpy as np
+
+# Function to calculate gradient estimator
+def GRADIENTESTIMATOR(St, epsilon, d, delta):
+    # Implementation of your gradient estimator logic
+    # ...
+
+# Function for the optimization algorithm
+def iterative_optimization(T, step_size_sequence, sample_size_sequence, epsilon, dimension, confidence):
+    # Initialization
+    x = np.zeros(dimension)  # Assuming initial x1 is a zero vector
+
+    for t in range(T):
+        # Collect samples Zt from current position Pt
+        Zt = np.random.randn(sample_size_sequence[t], dimension)  # Example random samples, replace with actual data collection
+
+        # Compute St = ∑ ∇`(zi; xt) for i in 1 to nt
+        St = np.sum(np.array([gradient_function(zi, x) for zi in Zt]), axis=0)  # Replace with your actual gradient calculation
+
+        # Calculate gradient estimator
+        get = GRADIENTESTIMATOR(St, epsilon, dimension, confidence)
+
+        # Update x using the optimization step
+        x = x - step_size_sequence[t] * get
+
+    return x
+
+# Example usage
+T = 100  # Number of iterations
+eta_sequence = np.linspace(0.1, 0.01, T)  # Example step size sequence
+nt_sequence = np.ones(T, dtype=int) * 10  # Example sample size sequence
+epsilon = 0.01  # Contaminated level
+dimension = 2  # Dimension of the vector
+confidence = 0.95  # Confidence level
+
+result = iterative_optimization(T, eta_sequence, nt_sequence, epsilon, dimension, confidence)
+print("Final result:", result)
